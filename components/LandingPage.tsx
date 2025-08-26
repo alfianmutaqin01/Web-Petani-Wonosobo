@@ -177,7 +177,7 @@ export function LandingPage({ onLoginClick }: LandingPageProps) {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                EcoScope Banyumas
+                SiagaTani Wonosobo
               </h1>
               <p className="text-sm text-gray-600">
                 Sistem Monitoring Pertanian Terpadu

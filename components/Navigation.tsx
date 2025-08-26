@@ -19,7 +19,6 @@ const navigationItems = [
   { id: "slope", label: "Analisis Lereng", icon: Mountain },
   { id: "weather", label: "Prediksi Cuaca", icon: CloudSun },
   { id: "price", label: "Prediksi Harga", icon: TrendingUp },
-  { id: "account", label: "Akun", icon: User },
 ];
 
 export function Navigation({ currentPage, onPageChange }: NavigationProps) {
@@ -49,15 +48,15 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
         <div className="mb-8">
           {/* <div className="flex items-center space-x-2 mb-2">
             <span className="text-2xl">🌱</span>
-            <h1 className="text-2xl font-bold text-primary">EcoScope</h1>
+            <h1 className="text-2xl font-bold text-primary">SiagaTani</h1>
           </div> */}
           <div className="flex items-center space-x-2 mb-2">
-  <img src="src/assets/logo.svg" alt="EcoScope Logo" className="w-20 h-20" />
-  <h1 className="text-2xl font-bold text-primary">EcoScope</h1>
+  <img src="src/assets/logo.svg" alt="SiagaTani Logo" className="w-20 h-20" />
+  <h1 className="text-2xl font-bold text-primary">SiagaTani</h1>
 </div>
 
           <p className="text-muted-foreground">
-            Monitoring Lingkungan Banyumas
+            Monitoring Lingkungan Wonosobo
           </p>
         </div>
         <NavigationContent />
@@ -68,9 +67,9 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-xl">🌱</span>
-            <h1 className="text-xl font-bold text-primary">EcoScope</h1>
+            <h1 className="text-xl font-bold text-primary">SiagaTani</h1>
           </div>
-          <p className="text-sm text-muted-foreground">Banyumas</p>
+          <p className="text-sm text-muted-foreground">Wonosobo</p>
         </div>
         <Sheet>
           <SheetTrigger asChild>
@@ -80,17 +79,17 @@ export function Navigation({ currentPage, onPageChange }: NavigationProps) {
             </button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64">
-            <SheetTitle>EcoScope Navigation</SheetTitle>
+            <SheetTitle>SiagaTani Navigation</SheetTitle>
             <SheetDescription>
-              Navigate through the EcoScope Banyumas application
+              Navigate through the SiagaTani Wonosobo application
             </SheetDescription>
             <div className="mb-8 mt-6">
               <div className="flex items-center space-x-2 mb-2">
                 <span className="text-2xl">🌱</span>
-                <h1 className="text-2xl font-bold text-primary">EcoScope</h1>
+                <h1 className="text-2xl font-bold text-primary">SiagaTani</h1>
               </div>
               <p className="text-muted-foreground">
-                Monitoring Lingkungan Banyumas
+                Monitoring Lingkungan Wonosobo
               </p>
             </div>
             <NavigationContent />

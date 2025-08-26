@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -34,102 +34,30 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export function WeatherPrediction() {
-  const [selectedLocation, setSelectedLocation] = useState("sumbang");
+const fetchBMKGData = async (adm4Code: string) => {
+  const url = `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${adm4Code}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    const rawData = await response.json();
+    const locationData = rawData?.lokasi;
+    const forecastData = rawData?.data?.[0]?.cuaca;
+    if (!locationData || !forecastData) {
+      throw new Error("Struktur data dari BMKG API tidak valid.");
+    }
+    return { location: locationData, forecast: forecastData };
+  } catch (error) {
+    console.error("Gagal mengambil data dari BMKG API:", error);
+    return null;
+  }
+};
 
-  const weeklyWeather = [
-    {
-      day: "Sen",
-      date: "27 Jul",
-      icon: Sun,
-      weather: "Cerah",
-      temp: "24-32°C",
-      rain: 0,
-      humidity: 65,
-      plantAdvice: "good",
-    },
-    {
-      day: "Sel",
-      date: "28 Jul",
-      icon: CloudRain,
-      weather: "Hujan Ringan",
-      temp: "22-28°C",
-      rain: 15,
-      humidity: 85,
-      plantAdvice: "caution",
-    },
-    {
-      day: "Rab",
-      date: "29 Jul",
-      icon: Zap,
-      weather: "Hujan Lebat",
-      temp: "21-26°C",
-      rain: 45,
-      humidity: 90,
-      plantAdvice: "avoid",
-    },
-    {
-      day: "Kam",
-      date: "30 Jul",
-      icon: CloudRain,
-      weather: "Hujan Ringan",
-      temp: "23-29°C",
-      rain: 20,
-      humidity: 80,
-      plantAdvice: "caution",
-    },
-    {
-      day: "Jum",
-      date: "31 Jul",
-      icon: Cloud,
-      weather: "Berawan",
-      temp: "24-30°C",
-      rain: 5,
-      humidity: 70,
-      plantAdvice: "good",
-    },
-    {
-      day: "Sab",
-      date: "1 Agu",
-      icon: Sun,
-      weather: "Cerah",
-      temp: "25-33°C",
-      rain: 0,
-      humidity: 60,
-      plantAdvice: "excellent",
-    },
-    {
-      day: "Min",
-      date: "2 Agu",
-      icon: Sun,
-      weather: "Cerah",
-      temp: "26-34°C",
-      rain: 0,
-      humidity: 55,
-      plantAdvice: "excellent",
-    },
-  ];
-
-  const rainfallData = [
-    { day: "Sen", rainfall: 0, temp: 28 },
-    { day: "Sel", rainfall: 15, temp: 25 },
-    { day: "Rab", rainfall: 45, temp: 23 },
-    { day: "Kam", rainfall: 20, temp: 26 },
-    { day: "Jum", rainfall: 5, temp: 27 },
-    { day: "Sab", rainfall: 0, temp: 29 },
-    { day: "Min", rainfall: 0, temp: 30 },
-  ];
-
-  const historicalData = [
-    { month: "Feb", rainfall: 180, temp: 27 },
-    { month: "Mar", rainfall: 220, temp: 28 },
-    { month: "Apr", rainfall: 160, temp: 29 },
-    { month: "Mei", rainfall: 140, temp: 28 },
-    { month: "Jun", rainfall: 90, temp: 26 },
-    { month: "Jul", rainfall: 120, temp: 25 },
-  ];
-
-  // New: Monthly planting recommendations
+// Fungsi untuk menganalisis data cuaca dan memberikan rekomendasi AI
+const analyzeWithAI = (weatherData: any) => {
+  // === LOGIKA AI ANDA DI SINI ===
+  // Ini adalah data simulasi, perlu disesuaikan dengan output model AI Anda.
   const monthlyPlantingPredictions = [
     {
       month: "Agustus 2025",
@@ -137,21 +65,9 @@ export function WeatherPrediction() {
       rainfall: 80,
       temp: 26,
       recommendations: [
-        {
-          plant: "Jagung",
-          suitability: "excellent",
-          reason: "Cuaca kering ideal untuk jagung",
-        },
-        {
-          plant: "Kacang Tanah",
-          suitability: "good",
-          reason: "Toleran terhadap kekeringan",
-        },
-        {
-          plant: "Ubi Jalar",
-          suitability: "good",
-          reason: "Tahan kekeringan, hasil optimal",
-        },
+        { plant: "Jagung", suitability: "excellent", reason: "Cuaca kering ideal untuk jagung" },
+        { plant: "Kacang Tanah", suitability: "good", reason: "Toleran terhadap kekeringan" },
+        { plant: "Ubi Jalar", suitability: "good", reason: "Tahan kekeringan, hasil optimal" },
       ],
     },
     {
@@ -160,21 +76,9 @@ export function WeatherPrediction() {
       rainfall: 120,
       temp: 27,
       recommendations: [
-        {
-          plant: "Cabai",
-          suitability: "excellent",
-          reason: "Cuaca mulai lembab, ideal untuk cabai",
-        },
-        {
-          plant: "Tomat",
-          suitability: "good",
-          reason: "Kelembaban cukup untuk pertumbuhan",
-        },
-        {
-          plant: "Bayam",
-          suitability: "excellent",
-          reason: "Sayuran hijau tumbuh optimal",
-        },
+        { plant: "Cabai", suitability: "excellent", reason: "Cuaca mulai lembab, ideal untuk cabai" },
+        { plant: "Tomat", suitability: "good", reason: "Kelembaban cukup untuk pertumbuhan" },
+        { plant: "Bayam", suitability: "excellent", reason: "Sayuran hijau tumbuh optimal" },
       ],
     },
     {
@@ -183,94 +87,99 @@ export function WeatherPrediction() {
       rainfall: 180,
       temp: 26,
       recommendations: [
-        {
-          plant: "Padi",
-          suitability: "excellent",
-          reason: "Awal musim hujan, perfect untuk padi",
-        },
-        {
-          plant: "Kangkung",
-          suitability: "excellent",
-          reason: "Sayuran air, butuh kelembaban tinggi",
-        },
-        {
-          plant: "Kacang Panjang",
-          suitability: "good",
-          reason: "Curah hujan cukup untuk pertumbuhan",
-        },
-      ],
-    },
-    {
-      month: "November 2025",
-      season: "Musim Hujan",
-      rainfall: 250,
-      temp: 25,
-      recommendations: [
-        {
-          plant: "Padi",
-          suitability: "excellent",
-          reason: "Peak musim hujan, optimal untuk padi",
-        },
-        {
-          plant: "Kelapa Sawit",
-          suitability: "good",
-          reason: "Tanaman tahunan butuh air banyak",
-        },
-        {
-          plant: "Pisang",
-          suitability: "good",
-          reason: "Kelembaban tinggi mendukung pertumbuhan",
-        },
-      ],
-    },
-    {
-      month: "Desember 2025",
-      season: "Musim Hujan",
-      rainfall: 280,
-      temp: 24,
-      recommendations: [
-        {
-          plant: "Padi (Varietas Tahan Banjir)",
-          suitability: "good",
-          reason: "Gunakan varietas tahan genangan",
-        },
-        {
-          plant: "Kangkung",
-          suitability: "excellent",
-          reason: "Optimal di kondisi basah",
-        },
-        {
-          plant: "Eceng Gondok (Biomassa)",
-          suitability: "good",
-          reason: "Untuk kompos dan pakan ternak",
-        },
-      ],
-    },
-    {
-      month: "Januari 2026",
-      season: "Peak Musim Hujan",
-      rainfall: 320,
-      temp: 23,
-      recommendations: [
-        {
-          plant: "Avoid Heavy Planting",
-          suitability: "caution",
-          reason: "Curah hujan sangat tinggi, risiko banjir",
-        },
-        {
-          plant: "Perawatan Tanaman Existing",
-          suitability: "caution",
-          reason: "Focus pada drainase dan maintenance",
-        },
-        {
-          plant: "Persiapan Bibit untuk Februari",
-          suitability: "good",
-          reason: "Siapkan bibit untuk setelah hujan reda",
-        },
+        { plant: "Padi", suitability: "excellent", reason: "Awal musim hujan, cocok untuk padi" },
+        { plant: "Kangkung", suitability: "excellent", reason: "Sayuran air, butuh kelembaban tinggi" },
+        { plant: "Kacang Panjang", suitability: "good", reason: "Curah hujan cukup untuk pertumbuhan" },
       ],
     },
   ];
+  return monthlyPlantingPredictions;
+};
 
+// Fungsi untuk mengkonversi data BMKG per 3 jam menjadi data harian
+const convertForecastToWeekly = (forecast: any) => {
+    if (!forecast || forecast.length === 0) return { weeklyWeather: [], rainfallData: [] };
+
+    const dailyData: any = {};
+    
+    // Iterasi melalui setiap hari prakiraan
+    forecast.forEach((dayForecast: any) => {
+        dayForecast.forEach((prakiraan: any) => {
+            const date = prakiraan.local_datetime.split(' ')[0];
+            const dayOfWeek = new Date(date).toLocaleDateString('id-ID', { weekday: 'short' });
+
+            if (!dailyData[date]) {
+                dailyData[date] = {
+                    day: dayOfWeek,
+                    date: new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
+                    icon: prakiraan.weather_desc, 
+                    weather: prakiraan.weather_desc,
+                    temp: `${prakiraan.t}°C`,
+                    rain: prakiraan.hu, 
+                    humidity: prakiraan.hu,
+                    plantAdvice: 'good', 
+                    maxTemp: prakiraan.t,
+                    minTemp: prakiraan.t,
+                    rawTemp: prakiraan.t,
+                };
+            } else {
+                dailyData[date].maxTemp = Math.max(dailyData[date].maxTemp, prakiraan.t);
+                dailyData[date].minTemp = Math.min(dailyData[date].minTemp, prakiraan.t);
+                dailyData[date].temp = `${dailyData[date].minTemp}-${dailyData[date].maxTemp}°C`;
+            }
+        });
+    });
+
+    const weeklyWeather = Object.values(dailyData);
+    const rainfallData = weeklyWeather.map((item: any) => ({
+      day: item.day,
+      rainfall: item.rain,
+      temp: item.maxTemp,
+    }));
+  
+    return { weeklyWeather, rainfallData };
+};
+
+
+// Fungsi untuk memetakan deskripsi cuaca dari BMKG ke ikon Lucide React
+const getIconForWeather = (weatherDesc: string) => {
+  if (weatherDesc.includes("Cerah")) return Sun;
+  if (weatherDesc.includes("Hujan")) return CloudRain;
+  if (weatherDesc.includes("Berawan")) return Cloud;
+  return Sun;
+};
+
+export function WeatherPrediction() {
+  const [selectedLocation, setSelectedLocation] = useState("33.07.01.2001");
+  const [weatherData, setWeatherData] = useState<any>(null);
+  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      const data = await fetchBMKGData(selectedLocation);
+
+      if (data) {
+        const { forecast } = data;
+        
+        // Konversi data prakiraan per 3 jam menjadi data mingguan dan chart
+        const processedData = convertForecastToWeekly(forecast);
+        setWeatherData(processedData);
+        
+        // Panggil AI dengan data yang sudah diproses
+        const recommendations = analyzeWithAI(processedData);
+        setAiRecommendations(recommendations);
+      } else {
+        setWeatherData(null);
+        setAiRecommendations(null);
+      }
+      setIsLoading(false);
+    };
+    loadData();
+  }, [selectedLocation]);
+
+  // Fungsi utilitas lainnya (getSuitabilityColor, dll) tetap sama
   const getSuitabilityColor = (suitability: string) => {
     switch (suitability) {
       case "excellent":
@@ -298,15 +207,17 @@ export function WeatherPrediction() {
   };
 
   const downloadPlantingGuide = () => {
-    const content = monthlyPlantingPredictions
+    if (!aiRecommendations) return;
+    
+    const content = aiRecommendations
       .map(
-        (month) =>
+        (month: any) =>
           `${month.month} (${month.season})\n` +
           `Curah Hujan: ${month.rainfall}mm | Suhu: ${month.temp}°C\n` +
           `Rekomendasi Tanaman:\n` +
           month.recommendations
             .map(
-              (rec) =>
+              (rec: any) =>
                 `- ${rec.plant}: ${getSuitabilityText(rec.suitability)} (${
                   rec.reason
                 })`
@@ -316,7 +227,7 @@ export function WeatherPrediction() {
       )
       .join("");
 
-    const blob = new Blob([`Panduan Tanam EcoScope Banyumas\n\n${content}`], {
+    const blob = new Blob([`Panduan Tanam EcoScope Wonosobo\n\n${content}`], {
       type: "text/plain",
     });
     const url = URL.createObjectURL(blob);
@@ -330,7 +241,7 @@ export function WeatherPrediction() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-
+  
   const getPlantAdviceColor = (advice: string) => {
     switch (advice) {
       case "excellent":
@@ -376,16 +287,36 @@ export function WeatherPrediction() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-8xl mx-auto flex justify-center items-center h-screen">
+        <p className="text-muted-foreground">
+          Memuat data cuaca dan rekomendasi...
+        </p>
+      </div>
+    );
+  }
+
+  if (!weatherData || !aiRecommendations) {
+    return (
+      <div className="p-6 max-w-8xl mx-auto flex justify-center items-center h-screen">
+        <p className="text-destructive-foreground">
+          Gagal memuat data cuaca. Silakan pilih lokasi lain atau coba lagi
+          nanti.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-8xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Prediksi Cuaca</h1>
         <p className="text-muted-foreground">
-          Prakiraan cuaca dan saran waktu tanam
+          Prakiraan cuaca dan saran waktu tanam dari BMKG
         </p>
       </div>
 
-      {/* Location Selector */}
       <div className="mb-6">
         <Card>
           <CardContent className="p-4">
@@ -399,12 +330,271 @@ export function WeatherPrediction() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="sumbang">Kec. Sumbang</SelectItem>
-                  <SelectItem value="kedungbanteng">
-                    Kec. Kedungbanteng
-                  </SelectItem>
-                  <SelectItem value="kembaran">Kec. Kembaran</SelectItem>
-                  <SelectItem value="banyumas">Kec. Banyumas</SelectItem>
+                  <SelectItem value="33.07.01.2001">Desa Kaligowong</SelectItem>
+                  <SelectItem value="33.07.01.2002">Desa Sumbersari</SelectItem>
+                  <SelectItem value="33.07.01.2003">Desa Sumberejo</SelectItem>
+                  <SelectItem value="33.07.01.2004">Desa Erorejo</SelectItem>
+                  <SelectItem value="33.07.01.2005">Desa Karanganyar</SelectItem>
+                  <SelectItem value="33.07.01.2006">Desa Panerusan</SelectItem>
+                  <SelectItem value="33.07.01.1007">Kelurahan Wadaslintang</SelectItem>
+                  <SelectItem value="33.07.01.2008">Desa Plunjaran</SelectItem>
+                  <SelectItem value="33.07.01.2009">Desa Kumejing</SelectItem>
+                  <SelectItem value="33.07.01.2010">Desa Lancar</SelectItem>
+                  <SelectItem value="33.07.01.2011">Desa Somogede</SelectItem>
+                  <SelectItem value="33.07.01.2012">Desa Trimulyo</SelectItem>
+                  <SelectItem value="33.07.01.2013">Desa Tirip</SelectItem>
+                  <SelectItem value="33.07.01.2014">Desa Besuki</SelectItem>
+                  <SelectItem value="33.07.01.2015">Desa Gumelar</SelectItem>
+                  <SelectItem value="33.07.01.2016">Desa Ngalian</SelectItem>
+                  <SelectItem value="33.07.01.2017">Desa Kalidadap</SelectItem>
+                  <SelectItem value="33.07.02.2001">Desa Gondowulan</SelectItem>
+                  <SelectItem value="33.07.02.2002">Desa Jangkrikan</SelectItem>
+                  <SelectItem value="33.07.02.2003">Desa Tegeswetan</SelectItem>
+                  <SelectItem value="33.07.02.2004">Desa Gadingsukuh</SelectItem>
+                  <SelectItem value="33.07.02.2005">Desa Burat</SelectItem>
+                  <SelectItem value="33.07.02.2006">Desa Bener</SelectItem>
+                  <SelectItem value="33.07.02.2007">Desa Gadingrejo</SelectItem>
+                  <SelectItem value="33.07.02.1008">Kelurahan Kepil</SelectItem>
+                  <SelectItem value="33.07.02.2009">Desa Beran</SelectItem>
+                  <SelectItem value="33.07.02.2010">Desa Kapulogo</SelectItem>
+                  <SelectItem value="33.07.02.2011">Desa Kagungan</SelectItem>
+                  <SelectItem value="33.07.02.2012">Desa Randusari</SelectItem>
+                  <SelectItem value="33.07.02.2013">Desa Rejosari</SelectItem>
+                  <SelectItem value="33.07.02.2014">Desa Ngalian</SelectItem>
+                  <SelectItem value="33.07.02.2015">Desa Kalipuru</SelectItem>
+                  <SelectItem value="33.07.02.2016">Desa Tanjunganom</SelectItem>
+                  <SelectItem value="33.07.02.2017">Desa Kaliwuluh</SelectItem>
+                  <SelectItem value="33.07.02.2018">Desa Tegalgot</SelectItem>
+                  <SelectItem value="33.07.02.2019">Desa Warangan</SelectItem>
+                  <SelectItem value="33.07.02.2020">Desa Ropoh</SelectItem>
+                  <SelectItem value="33.07.02.2021">Desa Pulosaren</SelectItem>
+                  <SelectItem value="33.07.03.2001">Desa Bogoran</SelectItem>
+                  <SelectItem value="33.07.03.2002">Desa Karangsari</SelectItem>
+                  <SelectItem value="33.07.03.2003">Desa Pecekelan</SelectItem>
+                  <SelectItem value="33.07.03.2004">Desa Glagah</SelectItem>
+                  <SelectItem value="33.07.03.2005">Desa Surojoyo</SelectItem>
+                  <SelectItem value="33.07.03.2006">Desa Talunombo</SelectItem>
+                  <SelectItem value="33.07.03.2007">Desa Tempursari</SelectItem>
+                  <SelectItem value="33.07.03.1008">Kelurahan Sapuran</SelectItem>
+                  <SelectItem value="33.07.03.2009">Desa Jolontoro</SelectItem>
+                  <SelectItem value="33.07.03.2010">Desa Sedayu</SelectItem>
+                  <SelectItem value="33.07.03.2011">Desa Ngadisalam</SelectItem>
+                  <SelectItem value="33.07.03.2012">Desa Tempuranduwur</SelectItem>
+                  <SelectItem value="33.07.03.2013">Desa Marongsari</SelectItem>
+                  <SelectItem value="33.07.03.2014">Desa Batursari</SelectItem>
+                  <SelectItem value="33.07.03.2015">Desa Banyumudal</SelectItem>
+                  <SelectItem value="33.07.03.2016">Desa Ngadikerso</SelectItem>
+                  <SelectItem value="33.07.03.2017">Desa Rimpak</SelectItem>
+                  <SelectItem value="33.07.04.2001">Desa Selomanik</SelectItem>
+                  <SelectItem value="33.07.04.2002">Desa Bendungan</SelectItem>
+                  <SelectItem value="33.07.04.2003">Desa Medono</SelectItem>
+                  <SelectItem value="33.07.04.2004">Desa Ngadisono</SelectItem>
+                  <SelectItem value="33.07.04.2005">Desa Lebak</SelectItem>
+                  <SelectItem value="33.07.04.2006">Desa Ngasinan</SelectItem>
+                  <SelectItem value="33.07.04.2007">Desa Kaliguwo</SelectItem>
+                  <SelectItem value="33.07.04.2008">Desa Pesodongan</SelectItem>
+                  <SelectItem value="33.07.04.2009">Desa Lamuk</SelectItem>
+                  <SelectItem value="33.07.04.2010">Desa Pucungkerep</SelectItem>
+                  <SelectItem value="33.07.04.2011">Desa Gambaran</SelectItem>
+                  <SelectItem value="33.07.04.2012">Desa Purwosari</SelectItem>
+                  <SelectItem value="33.07.04.2013">Desa Grugu</SelectItem>
+                  <SelectItem value="33.07.04.2014">Desa Tracap</SelectItem>
+                  <SelectItem value="33.07.04.1015">Kelurahan Kaliwiro</SelectItem>
+                  <SelectItem value="33.07.04.2016">Desa Kauman</SelectItem>
+                  <SelectItem value="33.07.04.2017">Desa Cledok</SelectItem>
+                  <SelectItem value="33.07.04.2018">Desa Winongsari</SelectItem>
+                  <SelectItem value="33.07.04.2019">Desa Sukoreno</SelectItem>
+                  <SelectItem value="33.07.04.2020">Desa Kemiriombo</SelectItem>
+                  <SelectItem value="33.07.04.2021">Desa Tanjunganom</SelectItem>
+                  <SelectItem value="33.07.05.2001">Desa Sawangan</SelectItem>
+                  <SelectItem value="33.07.05.2002">Desa Lipursari</SelectItem>
+                  <SelectItem value="33.07.05.2003">Desa Selokromo</SelectItem>
+                  <SelectItem value="33.07.05.2004">Desa Sojokerto</SelectItem>
+                  <SelectItem value="33.07.05.2005">Desa Besani</SelectItem>
+                  <SelectItem value="33.07.05.1006">Kelurahan Leksono</SelectItem>
+                  <SelectItem value="33.07.05.2007">Desa Jlamprang</SelectItem>
+                  <SelectItem value="33.07.05.2008">Desa Wonokerto</SelectItem>
+                  <SelectItem value="33.07.05.2009">Desa Jonggolsari</SelectItem>
+                  <SelectItem value="33.07.05.2010">Desa Kalimendong</SelectItem>
+                  <SelectItem value="33.07.05.2011">Desa Timbang</SelectItem>
+                  <SelectItem value="33.07.05.2012">Desa Pacarmulyo</SelectItem>
+                  <SelectItem value="33.07.05.2013">Desa Durensawit</SelectItem>
+                  <SelectItem value="33.07.05.2014">Desa Manggis</SelectItem>
+                  <SelectItem value="33.07.06.2001">Desa Kecis</SelectItem>
+                  <SelectItem value="33.07.06.2002">Desa Kaliputih</SelectItem>
+                  <SelectItem value="33.07.06.2003">Desa Candi</SelectItem>
+                  <SelectItem value="33.07.06.2004">Desa Balekambang</SelectItem>
+                  <SelectItem value="33.07.06.2005">Desa Karangrejo</SelectItem>
+                  <SelectItem value="33.07.06.2006">Desa Krasak</SelectItem>
+                  <SelectItem value="33.07.06.2007">Desa Gunungtawang</SelectItem>
+                  <SelectItem value="33.07.06.1008">Kelurahan Selomerto</SelectItem>
+                  <SelectItem value="33.07.06.2009">Desa Pakuncen</SelectItem>
+                  <SelectItem value="33.07.06.2010">Desa Kalierang</SelectItem>
+                  <SelectItem value="33.07.06.1011">Kelurahan Wonorejo</SelectItem>
+                  <SelectItem value="33.07.06.2012">Desa Wilayu</SelectItem>
+                  <SelectItem value="33.07.06.2013">Desa Sinduagung</SelectItem>
+                  <SelectItem value="33.07.06.2014">Desa Sumberwulan</SelectItem>
+                  <SelectItem value="33.07.06.2015">Desa Plobangan</SelectItem>
+                  <SelectItem value="33.07.06.2016">Desa Simbarejo</SelectItem>
+                  <SelectItem value="33.07.06.2017">Desa Wulungsari</SelectItem>
+                  <SelectItem value="33.07.06.2018">Desa Bumitirto</SelectItem>
+                  <SelectItem value="33.07.06.2019">Desa Semayu</SelectItem>
+                  <SelectItem value="33.07.06.2020">Desa Adiwarno</SelectItem>
+                  <SelectItem value="33.07.06.2021">Desa Kadipaten</SelectItem>
+                  <SelectItem value="33.07.06.2022">Desa Sidorejo</SelectItem>
+                  <SelectItem value="33.07.06.2023">Desa Tumenggungan</SelectItem>
+                  <SelectItem value="33.07.06.2024">Desa Ngadimulyo</SelectItem>
+                  <SelectItem value="33.07.07.2001">Desa Mangunrejo</SelectItem>
+                  <SelectItem value="33.07.07.2002">Desa Mungkung</SelectItem>
+                  <SelectItem value="33.07.07.2003">Desa Perboto</SelectItem>
+                  <SelectItem value="33.07.07.2004">Desa Kedalon</SelectItem>
+                  <SelectItem value="33.07.07.2005">Desa Rejosari</SelectItem>
+                  <SelectItem value="33.07.07.1006">Kelurahan Kalikajar</SelectItem>
+                  <SelectItem value="33.07.07.2007">Desa Simbang</SelectItem>
+                  <SelectItem value="33.07.07.2008">Desa Karangduwur</SelectItem>
+                  <SelectItem value="33.07.07.2009">Desa Kwadungan</SelectItem>
+                  <SelectItem value="33.07.07.2010">Desa Purwojiwo</SelectItem>
+                  <SelectItem value="33.07.07.2011">Desa Wonosari</SelectItem>
+                  <SelectItem value="33.07.07.2012">Desa Kalikuning</SelectItem>
+                  <SelectItem value="33.07.07.2013">Desa Maduretno</SelectItem>
+                  <SelectItem value="33.07.07.2014">Desa Tegalombo</SelectItem>
+                  <SelectItem value="33.07.07.2015">Desa Kembaran</SelectItem>
+                  <SelectItem value="33.07.07.2016">Desa Lamuk</SelectItem>
+                  <SelectItem value="33.07.07.2017">Desa Bowongso</SelectItem>
+                  <SelectItem value="33.07.07.2018">Desa Butuh</SelectItem>
+                  <SelectItem value="33.07.07.2019">Desa Butuh Kidul</SelectItem>
+                  <SelectItem value="33.07.08.1001">Kelurahan Wringinanom</SelectItem>
+                  <SelectItem value="33.07.08.2002">Desa Sudungdewo</SelectItem>
+                  <SelectItem value="33.07.08.2003">Desa Bejiarum</SelectItem>
+                  <SelectItem value="33.07.08.2004">Desa Ngadikusuman</SelectItem>
+                  <SelectItem value="33.07.08.2005">Desa Bojasari</SelectItem>
+                  <SelectItem value="33.07.08.2006">Desa Surengede</SelectItem>
+                  <SelectItem value="33.07.08.2007">Desa Sindupaten</SelectItem>
+                  <SelectItem value="33.07.08.1008">Kelurahan Kertek</SelectItem>
+                  <SelectItem value="33.07.08.2009">Desa Sumberdalem</SelectItem>
+                  <SelectItem value="33.07.08.2010">Desa Purwojati</SelectItem>
+                  <SelectItem value="33.07.08.2011">Desa Karangluhur</SelectItem>
+                  <SelectItem value="33.07.08.2012">Desa Tlogodalem</SelectItem>
+                  <SelectItem value="33.07.08.2013">Desa Banjar</SelectItem>
+                  <SelectItem value="33.07.08.2014">Desa Damarkasiyan</SelectItem>
+                  <SelectItem value="33.07.08.2015">Desa Tlogomulyo</SelectItem>
+                  <SelectItem value="33.07.08.2016">Desa Pagerejo</SelectItem>
+                  <SelectItem value="33.07.08.2017">Desa Candimulyo</SelectItem>
+                  <SelectItem value="33.07.08.2018">Desa Purbosono</SelectItem>
+                  <SelectItem value="33.07.08.2019">Desa Candiyasan</SelectItem>
+                  <SelectItem value="33.07.08.2020">Desa Kapencar</SelectItem>
+                  <SelectItem value="33.07.08.2021">Desa Reco</SelectItem>
+                  <SelectItem value="33.07.09.2001">Desa Wonolelo</SelectItem>
+                  <SelectItem value="33.07.09.1002">Kelurahan Tawangsari</SelectItem>
+                  <SelectItem value="33.07.09.1003">Kelurahan Mlipak</SelectItem>
+                  <SelectItem value="33.07.09.1004">Kelurahan Jaraksari</SelectItem>
+                  <SelectItem value="33.07.09.2005">Desa Jogoyitnan</SelectItem>
+                  <SelectItem value="33.07.09.1006">Kelurahan Kramatan</SelectItem>
+                  <SelectItem value="33.07.09.2007">Desa Pancurwening</SelectItem>
+                  <SelectItem value="33.07.09.1008">Kelurahan Bumiroso</SelectItem>
+                  <SelectItem value="33.07.09.1009">Kelurahan Rojoimo</SelectItem>
+                  <SelectItem value="33.07.09.1010">Kelurahan Pagerkukuh</SelectItem>
+                  <SelectItem value="33.07.09.1011">Kelurahan Sambek</SelectItem>
+                  <SelectItem value="33.07.09.1013">Kelurahan Kejiwan</SelectItem>
+                  <SelectItem value="33.07.09.1014">Kelurahan Kalianget</SelectItem>
+                  <SelectItem value="33.07.09.1015">Kelurahan Jlamprang</SelectItem>
+                  <SelectItem value="33.07.09.2016">Desa Wonosari</SelectItem>
+                  <SelectItem value="33.07.09.2017">Desa Bomerto</SelectItem>
+                  <SelectItem value="33.07.09.2018">Desa Sariyoso</SelectItem>
+                  <SelectItem value="33.07.09.2019">Desa Tlogojati</SelectItem>
+                  <SelectItem value="33.07.09.1020">Kelurahan Wonosobo Barat</SelectItem>
+                  <SelectItem value="33.07.09.1021">Kelurahan Wonosobo Timur</SelectItem>
+                  <SelectItem value="33.07.10.2001">Desa Bumiroso</SelectItem>
+                  <SelectItem value="33.07.10.2002">Desa Gondang</SelectItem>
+                  <SelectItem value="33.07.10.2003">Desa Limbangan</SelectItem>
+                  <SelectItem value="33.07.10.2004">Desa Kuripan</SelectItem>
+                  <SelectItem value="33.07.10.2005">Desa Banyukembar</SelectItem>
+                  <SelectItem value="33.07.10.2006">Desa Gumawangkidul</SelectItem>
+                  <SelectItem value="33.07.10.2007">Desa Wonosroyo</SelectItem>
+                  <SelectItem value="33.07.10.2008">Desa Watumalang</SelectItem>
+                  <SelectItem value="33.07.10.2009">Desa Pasuruhan</SelectItem>
+                  <SelectItem value="33.07.10.1010">Kelurahan Wonoroto</SelectItem>
+                  <SelectItem value="33.07.10.2011">Desa Lumajang</SelectItem>
+                  <SelectItem value="33.07.10.2012">Desa Binangun</SelectItem>
+                  <SelectItem value="33.07.10.2013">Desa Wonokampir</SelectItem>
+                  <SelectItem value="33.07.10.2014">Desa Krinjing</SelectItem>
+                  <SelectItem value="33.07.10.2015">Desa Mutisari</SelectItem>
+                  <SelectItem value="33.07.10.2016">Desa Kalidesel</SelectItem>
+                  <SelectItem value="33.07.11.2001">Desa Sojopuro</SelectItem>
+                  <SelectItem value="33.07.11.2002">Desa Candirejo</SelectItem>
+                  <SelectItem value="33.07.11.2003">Desa Keseneng</SelectItem>
+                  <SelectItem value="33.07.11.1004">Kelurahan Mudal</SelectItem>
+                  <SelectItem value="33.07.11.1005">Kelurahan Andongsili</SelectItem>
+                  <SelectItem value="33.07.11.2006">Desa Krasak</SelectItem>
+                  <SelectItem value="33.07.11.2007">Desa Bumirejo</SelectItem>
+                  <SelectItem value="33.07.11.2008">Desa Blederan</SelectItem>
+                  <SelectItem value="33.07.11.1009">Kelurahan Kalibeber</SelectItem>
+                  <SelectItem value="33.07.11.2010">Desa Sukorejo</SelectItem>
+                  <SelectItem value="33.07.11.2011">Desa Larangankulon</SelectItem>
+                  <SelectItem value="33.07.11.2012">Desa Pungangan</SelectItem>
+                  <SelectItem value="33.07.11.2013">Desa Gunturmadu</SelectItem>
+                  <SelectItem value="33.07.11.2014">Desa Mojosari</SelectItem>
+                  <SelectItem value="33.07.11.2015">Desa Wonokromo</SelectItem>
+                  <SelectItem value="33.07.11.2016">Desa Derongisor</SelectItem>
+                  <SelectItem value="33.07.11.2017">Desa Deroduwur</SelectItem>
+                  <SelectItem value="33.07.11.2018">Desa Slukatan</SelectItem>
+                  <SelectItem value="33.07.11.2019">Desa Kebrengan</SelectItem>
+                  <SelectItem value="33.07.12.2001">Desa Lengkong</SelectItem>
+                  <SelectItem value="33.07.12.2002">Desa Gemblengan</SelectItem>
+                  <SelectItem value="33.07.12.2003">Desa Sendangsari</SelectItem>
+                  <SelectItem value="33.07.12.2004">Desa Kayugiyang</SelectItem>
+                  <SelectItem value="33.07.12.1005">Kelurahan Garung</SelectItem>
+                  <SelectItem value="33.07.12.2006">Desa Siwuran</SelectItem>
+                  <SelectItem value="33.07.12.2007">Desa Kuripan</SelectItem>
+                  <SelectItem value="33.07.12.2008">Desa Jengkol</SelectItem>
+                  <SelectItem value="33.07.12.2009">Desa Tlogo</SelectItem>
+                  <SelectItem value="33.07.12.2010">Desa Maron</SelectItem>
+                  <SelectItem value="33.07.12.2011">Desa Menjer</SelectItem>
+                  <SelectItem value="33.07.12.2012">Desa Mlandi</SelectItem>
+                  <SelectItem value="33.07.12.2013">Desa Laranganlor</SelectItem>
+                  <SelectItem value="33.07.12.2014">Desa Sitiharjo</SelectItem>
+                  <SelectItem value="33.07.12.2015">Desa Tegalsari</SelectItem>
+                  <SelectItem value="33.07.13.2001">Desa Campursari</SelectItem>
+                  <SelectItem value="33.07.13.2002">Desa Sikunang</SelectItem>
+                  <SelectItem value="33.07.13.2003">Desa Sembungan</SelectItem>
+                  <SelectItem value="33.07.13.2004">Desa Kreo</SelectItem>
+                  <SelectItem value="33.07.13.2005">Desa Tambi</SelectItem>
+                  <SelectItem value="33.07.13.2006">Desa Buntu</SelectItem>
+                  <SelectItem value="33.07.13.2007">Desa Sigedang</SelectItem>
+                  <SelectItem value="33.07.13.1008">Kelurahan Kejajar</SelectItem>
+                  <SelectItem value="33.07.13.2009">Desa Serang</SelectItem>
+                  <SelectItem value="33.07.13.2010">Desa Tieng</SelectItem>
+                  <SelectItem value="33.07.13.2011">Desa Parikesit</SelectItem>
+                  <SelectItem value="33.07.13.2012">Desa Jojogan</SelectItem>
+                  <SelectItem value="33.07.13.2013">Desa Dieng</SelectItem>
+                  <SelectItem value="33.07.13.2014">Desa Patakbanteng</SelectItem>
+                  <SelectItem value="33.07.13.2015">Desa Surengede</SelectItem>
+                  <SelectItem value="33.07.13.2016">Desa Igirmranak</SelectItem>
+                  <SelectItem value="33.07.14.2001">Desa Kupangan</SelectItem>
+                  <SelectItem value="33.07.14.2002">Desa Mergosari</SelectItem>
+                  <SelectItem value="33.07.14.2003">Desa Sukoharjo</SelectItem>
+                  <SelectItem value="33.07.14.2004">Desa Rogojati</SelectItem>
+                  <SelectItem value="33.07.14.2005">Desa Karanganyar</SelectItem>
+                  <SelectItem value="33.07.14.2006">Desa Sempol</SelectItem>
+                  <SelectItem value="33.07.14.2007">Desa Plodongan</SelectItem>
+                  <SelectItem value="33.07.14.2008">Desa Suroyudan</SelectItem>
+                  <SelectItem value="33.07.14.2009">Desa Gumiwang</SelectItem>
+                  <SelectItem value="33.07.14.2010">Desa Gunungtugel</SelectItem>
+                  <SelectItem value="33.07.14.2011">Desa Pulus</SelectItem>
+                  <SelectItem value="33.07.14.2012">Desa Pucungwetan</SelectItem>
+                  <SelectItem value="33.07.14.2013">Desa Kajeksan</SelectItem>
+                  <SelectItem value="33.07.14.2014">Desa Tlogo</SelectItem>
+                  <SelectItem value="33.07.14.2015">Desa Kalibening</SelectItem>
+                  <SelectItem value="33.07.14.2016">Desa Garunglor</SelectItem>
+                  <SelectItem value="33.07.14.2017">Desa Jebengplampitan</SelectItem>
+                  <SelectItem value="33.07.15.2001">Desa Pengarengan</SelectItem>
+                  <SelectItem value="33.07.15.2002">Desa Kalikarung</SelectItem>
+                  <SelectItem value="33.07.15.2003">Desa Dempel</SelectItem>
+                  <SelectItem value="33.07.15.2004">Desa Karangsambung</SelectItem>
+                  <SelectItem value="33.07.15.2005">Desa Tempurejo</SelectItem>
+                  <SelectItem value="33.07.15.2006">Desa Mergolangu</SelectItem>
+                  <SelectItem value="33.07.15.2007">Desa Depok</SelectItem>
+                  <SelectItem value="33.07.15.2008">Desa Kalialang</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -414,17 +604,17 @@ export function WeatherPrediction() {
 
       <Tabs defaultValue="weekly" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="weekly">Mingguan</TabsTrigger>
+          <TabsTrigger value="weekly">Prakiraan 3 Harian</TabsTrigger>
           <TabsTrigger value="monthly">Prediksi Bulanan</TabsTrigger>
           <TabsTrigger value="charts">Grafik Detail</TabsTrigger>
           <TabsTrigger value="history">Riwayat</TabsTrigger>
         </TabsList>
 
         <TabsContent value="weekly">
-          {/* Weekly Calendar View */}
+          {/* Tampilan ini akan menggunakan data yang sudah diproses */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
-            {weeklyWeather.map((day, index) => {
-              const Icon = day.icon;
+            {weatherData.weeklyWeather.map((day: any, index: number) => {
+              const Icon = getIconForWeather(day.weather);
               return (
                 <Card key={index} className="text-center">
                   <CardContent className="p-4">
@@ -435,22 +625,18 @@ export function WeatherPrediction() {
                           {day.date}
                         </p>
                       </div>
-
                       <Icon className="h-8 w-8 mx-auto text-blue-500" />
-
                       <div>
                         <p className="text-sm font-medium">{day.weather}</p>
                         <p className="text-xs text-muted-foreground">
                           {day.temp}
                         </p>
                       </div>
-
                       <div className="space-y-2">
                         <div className="flex items-center justify-center space-x-1">
                           <Droplets className="h-3 w-3 text-blue-500" />
                           <span className="text-xs">{day.rain}mm</span>
                         </div>
-
                         <div
                           className={`px-2 py-1 rounded text-xs border flex items-center justify-center space-x-1 ${getPlantAdviceColor(
                             day.plantAdvice
@@ -467,12 +653,10 @@ export function WeatherPrediction() {
             })}
           </div>
 
-          {/* Today's Detail */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Thermometer className="h-5 w-5 mr-2" />
-                Detail Cuaca Hari Ini
+                <Thermometer className="h-5 w-5 mr-2" /> Detail Cuaca Hari Ini
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -480,17 +664,23 @@ export function WeatherPrediction() {
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
                   <Thermometer className="h-6 w-6 mx-auto mb-2 text-orange-500" />
                   <p className="text-sm text-muted-foreground">Suhu</p>
-                  <p className="font-medium">24-32°C</p>
+                  <p className="font-medium">
+                    {weatherData.weeklyWeather[0].temp}
+                  </p>
                 </div>
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
                   <Droplets className="h-6 w-6 mx-auto mb-2 text-blue-500" />
                   <p className="text-sm text-muted-foreground">Kelembaban</p>
-                  <p className="font-medium">65%</p>
+                  <p className="font-medium">
+                    {weatherData.weeklyWeather[0].humidity}%
+                  </p>
                 </div>
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
                   <CloudRain className="h-6 w-6 mx-auto mb-2 text-indigo-500" />
                   <p className="text-sm text-muted-foreground">Curah Hujan</p>
-                  <p className="font-medium">0 mm</p>
+                  <p className="font-medium">
+                    {weatherData.weeklyWeather[0].rain} mm
+                  </p>
                 </div>
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
                   <Sprout className="h-6 w-6 mx-auto mb-2 text-green-500" />
@@ -504,7 +694,6 @@ export function WeatherPrediction() {
 
         <TabsContent value="monthly">
           <div className="space-y-6">
-            {/* Header with download button */}
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-semibold">
@@ -523,9 +712,8 @@ export function WeatherPrediction() {
               </Button>
             </div>
 
-            {/* Monthly predictions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {monthlyPlantingPredictions.map((month, index) => (
+              {aiRecommendations.map((month: any, index: number) => (
                 <Card key={index}>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -548,21 +736,23 @@ export function WeatherPrediction() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {month.recommendations.map((rec, recIndex) => (
-                        <div key={recIndex} className="p-3 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium">{rec.plant}</h4>
-                            <Badge
-                              className={getSuitabilityColor(rec.suitability)}
-                            >
-                              {getSuitabilityText(rec.suitability)}
-                            </Badge>
+                      {month.recommendations.map(
+                        (rec: any, recIndex: number) => (
+                          <div key={recIndex} className="p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-medium">{rec.plant}</h4>
+                              <Badge
+                                className={getSuitabilityColor(rec.suitability)}
+                              >
+                                {getSuitabilityText(rec.suitability)}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {rec.reason}
+                            </p>
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            {rec.reason}
-                          </p>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -573,14 +763,13 @@ export function WeatherPrediction() {
 
         <TabsContent value="charts">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Rainfall Chart */}
             <Card>
               <CardHeader>
                 <CardTitle>Curah Hujan Mingguan</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={rainfallData}>
+                  <BarChart data={weatherData.rainfallData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="day" />
                     <YAxis />
@@ -593,14 +782,13 @@ export function WeatherPrediction() {
               </CardContent>
             </Card>
 
-            {/* Temperature Chart */}
             <Card>
               <CardHeader>
                 <CardTitle>Tren Suhu Mingguan</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={rainfallData}>
+                  <LineChart data={weatherData.rainfallData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="day" />
                     <YAxis />
@@ -624,28 +812,9 @@ export function WeatherPrediction() {
               <CardTitle>Riwayat Cuaca 6 Bulan Terakhir</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={historicalData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Bar
-                    yAxisId="left"
-                    dataKey="rainfall"
-                    fill="#3b82f6"
-                    name="Curah Hujan (mm)"
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="temp"
-                    stroke="#f59e0b"
-                    name="Suhu (°C)"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <p className="text-muted-foreground">
+                Data riwayat tidak tersedia dari API prakiraan BMKG.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>

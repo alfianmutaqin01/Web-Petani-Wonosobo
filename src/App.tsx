@@ -6,7 +6,7 @@ import { LoginRegisterWithRole } from "../components/LoginRegisterWithRole";
 import { LandingPage } from "../components/LandingPage";
 
 export default function App() {
-  const [showLanding, setShowLanding] = useState(true);
+  const [showLanding, setShowLanding] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [userRole, setUserRole] = useState<"farmer" | "admin">("farmer");
@@ -32,16 +32,6 @@ export default function App() {
     setCurrentPage("dashboard");
     setShowLanding(true);
   };
-
-  // Tampilkan landing page jika belum login dan showLanding true
-  if (showLanding && !isLoggedIn) {
-    return <LandingPage onLoginClick={handleLoginClick} />;
-  }
-
-  // Tampilkan halaman login jika tidak login dan tidak di landing
-  if (!isLoggedIn) {
-    return <LoginRegisterWithRole onLogin={handleLogin} />;
-  }
 
   // Tampilkan aplikasi utama jika sudah login
   const NavigationComponent =

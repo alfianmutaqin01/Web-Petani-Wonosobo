@@ -37,41 +37,41 @@ export function SlopeAnalysis() {
   const [showAlertDialog, setShowAlertDialog] = useState(false);
 
   const mapData = [
-    {
-      id: 1,
-      name: "Desa Sumbang",
-      coordinates: "-7.3297, 109.2478",
-      slope: 25,
-      risk: "medium",
-      color: "bg-yellow-500",
-      suggestions: ["Tanam tanaman penutup tanah", "Buat saluran drainase"],
-      lastUpdate: "2 jam lalu",
-    },
-    {
-      id: 2,
-      name: "Desa Kedungbanteng",
-      coordinates: "-7.3856, 109.3411",
-      slope: 35,
-      risk: "high",
-      color: "bg-red-500",
-      suggestions: [
-        "Hindari aktivitas berat",
-        "Pasang jaring pengaman",
-        "Monitoring ketat",
-      ],
-      lastUpdate: "1 jam lalu",
-    },
-    {
-      id: 3,
-      name: "Desa Kembaran",
-      coordinates: "-7.3569, 109.3275",
-      slope: 15,
-      risk: "low",
-      color: "bg-green-500",
-      suggestions: ["Kondisi aman untuk pertanian", "Tetap jaga drainase"],
-      lastUpdate: "30 menit lalu",
-    },
-  ];
+  {
+    id: 1,
+    name: "Desa Kejajar",
+    coordinates: "-7.2346, 109.8973",
+    slope: 30,
+    risk: "high",
+    color: "bg-red-500",
+    suggestions: [
+      "Hindari aktivitas berat",
+      "Pasang jaring pengaman",
+      "Monitoring ketat",
+    ],
+    lastUpdate: "3 jam lalu",
+  },
+  {
+    id: 2,
+    name: "Desa Sembungan",
+    coordinates: "-7.2510, 109.9189",
+    slope: 22,
+    risk: "medium",
+    color: "bg-yellow-500",
+    suggestions: ["Tanam tanaman penutup tanah", "Buat saluran drainase"],
+    lastUpdate: "1 jam lalu",
+  },
+  {
+    id: 3,
+    name: "Desa Garung",
+    coordinates: "-7.3113, 109.9168",
+    slope: 18,
+    risk: "low",
+    color: "bg-green-500",
+    suggestions: ["Kondisi aman untuk pertanian", "Tetap jaga drainase"],
+    lastUpdate: "45 menit lalu",
+  },
+];
 
   const riskHistory = [
     {
@@ -300,7 +300,7 @@ ${new Date().toLocaleString("id-ID")}`;
             <CardHeader>
               <CardTitle className="flex items-center">
                 <MapPin className="h-5 w-5 mr-2" />
-                Peta Interaktif Banyumas
+                Peta Interaktif Wonosobo
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -309,14 +309,14 @@ ${new Date().toLocaleString("id-ID")}`;
                 <div className="absolute inset-0 bg-gradient-to-br from-green-00 to-blue-200">
                   <div className="aspect-w-16 aspect-h-9">
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d469456.45906832715!2d108.83890425263063!3d-7.454879534767612!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e656746bfbcb0fd%3A0x3027a76e352ba60!2sKabupaten%20Banyumas%2C%20Jawa%20Tengah!5e1!3m2!1sid!2sid!4v1753551941904!5m2!1sid!2sid"
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15833.585526017232!2d109.88243403261622!3d-7.351225576101918!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7aa2f82c40b8a3%3A0x6e9a6e1476d0590a!2sWonosobo%2C%20Wonosobo%20Regency%2C%20Central%20Java!5e0!3m2!1sen!2sid!4v1714574577823!5m2!1sen!2sid"
                       width="100%"
                       height="400"
                       style={{ border: 0 }}
                       allowFullScreen
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
-                      title="Peta Banyumas"
+                      title="Peta Wonosobo"
                     />
                   </div>
                   {/* Legend */}
